@@ -4,7 +4,7 @@
   -- https://spark.apache.org/docs/latest/api/sql/index.html#max
 #}
 
-{% macro spark__bool_or(expression) -%}
+{% macro sparkhogwarts__bool_or(expression) -%}
 
     max({{ expression }})
 

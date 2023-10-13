@@ -1,4 +1,4 @@
-{% macro spark__get_merge_update_columns(merge_update_columns, merge_exclude_columns, dest_columns) %}
+{% macro sparkhogwarts__get_merge_update_columns(merge_update_columns, merge_exclude_columns, dest_columns) %}
   {%- set default_cols = None -%}
 
   {%- if merge_update_columns and merge_exclude_columns -%}

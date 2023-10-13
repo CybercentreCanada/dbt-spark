@@ -25,7 +25,7 @@
 {% endmacro %}
 
 
-{% macro spark__get_merge_sql(target, source, unique_key, dest_columns, incremental_predicates) %}
+{% macro sparkhogwarts__get_merge_sql(target, source, unique_key, dest_columns, incremental_predicates) %}
   {# need dest_columns for merge_exclude_columns, default to use "*" #}
   {%- set predicates = [] if incremental_predicates is none else [] + incremental_predicates -%}
   {%- set dest_columns = adapter.get_columns_in_relation(target) -%}

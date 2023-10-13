@@ -1,4 +1,4 @@
-{% macro spark__datediff(first_date, second_date, datepart) %}
+{% macro sparkhogwarts__datediff(first_date, second_date, datepart) %}
 
     {%- if datepart in ['day', 'week', 'month', 'quarter', 'year'] -%}
 
