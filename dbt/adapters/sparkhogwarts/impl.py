@@ -192,7 +192,7 @@ class SparkHogwartsAdapter(SQLAdapter):
             is_iceberg: bool = "Provider: iceberg" in information
 
             relation: BaseRelation = self.Relation.create(
-                database=database
+                database=database,
                 schema=_schema,
                 identifier=name,
                 type=rel_type,

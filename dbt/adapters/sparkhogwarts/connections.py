@@ -22,7 +22,7 @@ except ImportError:
     pyodbc = None
 from datetime import datetime
 import sqlparams
-from dbt.contracts.connection import Connection
+from dbt.adapters.sparkhogwarts.session import Connection
 from hologram.helpers import StrEnum
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Union, Tuple, List, Generator, Iterable
@@ -468,6 +468,7 @@ class SparkConnectionManager(SQLConnectionManager):
                     )
                 break
             except Exception as e:
+                print("Exception:" + str(e))
                 exc = e
                 if isinstance(e, EOFError):
                     # The user almost certainly has invalid credentials.
@@ -496,7 +497,7 @@ class SparkConnectionManager(SQLConnectionManager):
                     logger.warning(msg)
                     time.sleep(creds.connect_timeout)
                 else:
-                    raise dbt.exceptions.FailedToConnectError("failed to connect") from e
+                    raise dbt.exceptions.FailedToConnectError("failed to connect" + str(e)) from e
         else:
             raise exc  # type: ignore
 

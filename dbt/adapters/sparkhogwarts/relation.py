@@ -1,10 +1,16 @@
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, Dict, Any, Type
 from dataclasses import dataclass, field
 
 from dbt.adapters.base.relation import BaseRelation, Policy
 
 from dbt.exceptions import DbtRuntimeError
 from dbt.events import AdapterLogger
+
+from dbt.contracts.graph.nodes import SourceDefinition
+
+import importlib
+import os
+from datetime import datetime
 
 logger = AdapterLogger("Spark")
 
@@ -84,7 +90,7 @@ class SparkRelation(BaseRelation):
             return SparkRelation.create(database=None, schema=None, identifier=view_name)
 
     @classmethod
-    def create_from_source(cls: Type[Self], source: ParsedSourceDefinition, **kwargs: Any) -> Self:
+    def create_from_source(cls: Type[Self], source: SourceDefinition, **kwargs: Any) -> Self:
         source_quoting = source.quoting.to_dict(omit_none=True)
         source_quoting.pop("column", None)
         quote_policy = deep_merge(
