@@ -2,6 +2,7 @@ from typing import Optional, TypeVar, Dict, Any, Type
 from dataclasses import dataclass, field
 
 from dbt.adapters.base.relation import BaseRelation, Policy
+from dbt.utils import deep_merge
 
 from dbt.exceptions import DbtRuntimeError
 from dbt.events import AdapterLogger
