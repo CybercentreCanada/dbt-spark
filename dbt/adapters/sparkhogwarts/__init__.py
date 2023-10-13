@@ -5,8 +5,8 @@ from dbt.adapters.sparkhogwarts.column import SparkColumn  # noqa
 from dbt.adapters.sparkhogwarts.impl import SparkHogwartsAdapter
 
 from dbt.adapters.base import AdapterPlugin
-from dbt.include import spark
+from dbt.include import sparkhogwarts
 
 Plugin = AdapterPlugin(
-    adapter=SparkHogwartsAdapter, credentials=SparkCredentials, include_path=spark.PACKAGE_PATH  # type: ignore
+    adapter=SparkHogwartsAdapter, credentials=SparkCredentials, include_path=sparkhogwarts.PACKAGE_PATH  # type: ignore
 )
