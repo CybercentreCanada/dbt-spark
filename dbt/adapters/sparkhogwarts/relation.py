@@ -7,7 +7,20 @@ from dbt.utils import deep_merge
 from dbt.exceptions import DbtRuntimeError
 from dbt.events import AdapterLogger
 
-from dbt.contracts.graph.nodes import SourceDefinition
+from dbt.contracts.graph.nodes import SourceDefinition, ResultNode
+
+from dbt.contracts.relation import (
+    RelationType,
+    ComponentName,
+    HasQuoting,
+    FakeAPIObject,
+    Policy,
+    Path,
+)
+
+from dbt.utils import filter_null_values, deep_merge, classproperty, merge
+
+import dbt.exceptions
 
 import importlib
 import os
@@ -15,7 +28,7 @@ from datetime import datetime
 
 logger = AdapterLogger("Spark")
 
-Self = TypeVar("Self", bound="BaseRelation")
+Self = TypeVar("Self", bound="SparkRelation")
 
 
 @dataclass
@@ -52,7 +65,7 @@ class SparkRelation(BaseRelation):
 
     # cccs: create a view from a dataframe
     def load_python_module(self, start_time, end_time, **kwargs):
-        logger.debug(f"SparkRelation create source for {self.identifier}")
+        logger.debug(f"SparkRelation:load_python_module for source: {self.identifier}")
         from pyspark.sql import SparkSession
         spark = SparkSession.builder.getOrCreate()
         if self.meta and self.meta.get('python_module'):
@@ -63,7 +76,7 @@ class SparkRelation(BaseRelation):
             logger.debug(f"SparkRelation attempting to load generic python module {path}")
             spec = importlib.util.find_spec(path)
             if not spec:
-                raise RuntimeException(f"Cannot find python module {path}")
+                raise dbt.exceptions.DbtRuntimeError(f"Cannot find python module {path}")
 
             python_file = spec.origin
             # file modification timestamp of a file
@@ -77,16 +90,20 @@ class SparkRelation(BaseRelation):
                 logger.debug(f"View {view_name} already exists")
             else:
                 logger.debug(f"Creating view {view_name}")
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                create_dataframe = getattr(module, "create_dataframe")
-                df = create_dataframe(
-                    spark=spark,
-                    table_name=self.identifier,
-                    start_time=start_time,
-                    end_time=end_time,
-                    **kwargs)
-                df.createOrReplaceTempView(view_name)
+                try:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    create_dataframe = getattr(module, "create_dataframe")
+                    df = create_dataframe(
+                        spark=spark,
+                        table_name=self.identifier,
+                        start_time=start_time,
+                        end_time=end_time,
+                        **kwargs)
+                    df.createOrReplaceTempView(view_name)
+                except Exception as exception :
+                    logger.error(f"load_python_module error loading module and creating data frame, {exception.msg}")
+                    raise dbt.exceptions.DbtRuntimeError(f"Cannot find python module {path}")
             # Return a relation which only has a table name (spark view have no catalog or schema)
             return SparkRelation.create(database=None, schema=None, identifier=view_name)
 
@@ -111,6 +128,27 @@ class SparkRelation(BaseRelation):
             **kwargs,
         )
 
+    @classmethod
+    def create_from_node(
+            cls: Type[Self],
+            config: HasQuoting,
+            node,
+            quote_policy: Optional[Dict[str, bool]] = None,
+            **kwargs: Any,
+        ) -> Self:
+        if quote_policy is None:
+            quote_policy = {}
+        quote_policy = merge(config.quoting, quote_policy)
+
+        return cls.create(
+            database=config.credentials.database,
+            schema=node.schema,
+            identifier=node.alias,
+            quote_policy=quote_policy,
+            meta=node.meta,
+            **kwargs,
+        )
+
     def render(self):
         # if self.include_policy.database and self.include_policy.schema:
         #     raise RuntimeException(
@@ -118,3 +156,13 @@ class SparkRelation(BaseRelation):
         #         "include, but only one can be set"
         #     )
         return super().render()
+
+    @classmethod
+    def create_from(
+            cls: Type[Self],
+            config: HasQuoting,
+            node: ResultNode,
+            **kwargs: Any,
+        ) -> Self:
+        object_from = super().create_from(config, node, **kwargs)
+        return object_from

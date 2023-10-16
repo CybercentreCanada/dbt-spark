@@ -12,6 +12,7 @@ import agate
 
 import dbt
 import dbt.exceptions
+import pyspark.errors.exceptions.captured
 
 from dbt.adapters.base import AdapterConfig, PythonJobHelper
 from dbt.adapters.base.impl import catch_as_completed, ConstraintSupport
@@ -246,6 +247,30 @@ class SparkHogwartsAdapter(SQLAdapter):
                     f"Error while retrieving information about {schema_relation}: {errmsg}"
                 )
                 return []
+        # The 'SHOW TABLE EXTENDED is not supported for v2 tables' spark exception is not wrapped in a DbtRuntimeError for some reason.  It has to be handled by this function
+        except pyspark.errors.exceptions.captured.AnalysisException as error:
+            errmsg = getattr(error, "msg", "")
+            if "SHOW TABLE EXTENDED is not supported for v2 tables" in errmsg:
+                # this happens with spark-iceberg with v2 iceberg tables
+                # https://issues.apache.org/jira/browse/SPARK-33393
+                try:
+                    # Iceberg behavior: 3-row result of relations obtained
+                    show_table_rows = self.execute_macro(
+                        LIST_RELATIONS_SHOW_TABLES_MACRO_NAME, kwargs=kwargs
+                    )
+                    return self._build_spark_relation_list(
+                        database,
+                        row_list=show_table_rows,
+                        relation_info_func=self._get_relation_information_using_describe,
+                    )
+                except dbt.exceptions.DbtRuntimeError as e:
+                    logger.debug(f"Error while retrieving information about [{schema_relation}] error: {errmsg}")
+                    return []
+            else:
+                logger.debug(
+                    f"Error while retrieving information about {schema_relation}: {errmsg}"
+                )
+                return []
 
     def get_relation(self, database: str, schema: str, identifier: str) -> Optional[BaseRelation]:
         if not self.Relation.get_default_include_policy().database:
@@ -396,7 +421,6 @@ class SparkHogwartsAdapter(SQLAdapter):
 
         columns: List[Dict[str, Any]] = []
         for relation in self.list_relations(database, schema):
-            logger.debug("Getting table schema for relation {}", str(relation))
             columns.extend(self._get_columns_for_catalog(relation))
         return agate.Table.from_object(columns, column_types=DEFAULT_TYPE_TESTER)
 
