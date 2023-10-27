@@ -20,7 +20,7 @@ variables:
   tag: "$(Build.BuildId)"
   pythonArtifactName: "dbt-spark-cccs"
   pythonVersion: "3.10"
-  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/cccs-main')]
 
 pool: "stratus-build-pool.u"
 
@@ -70,8 +70,8 @@ stages:
               pathtoPublish: "$(Build.ArtifactStagingDirectory)/python/dist"
               artifactName: "python_dist"
               publishLocation: "Container"
-      - job: PublishArtifactToFeed
-        dependsOn: BuildPythonArtifact
+      - job: Publish
+        dependsOn: Build
         condition: or(eq(variables.isMaster, true), eq('${{ parameters.forceBuildPython }}', true))
         workspace:
           clean: all
