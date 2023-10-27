@@ -18,7 +18,7 @@ parameters:
 
 variables:
   tag: "$(Build.BuildId)"
-  pythonArtifactName: "dbt-spark-cccs"
+  pythonArtifactName: "dbt-spark-hogwarts"
   pythonVersion: "3.10"
   isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/cccs-main')]
 
@@ -37,9 +37,9 @@ stages:
               python -m venv venv
               . ./venv/bin/activate
               python -m pip install --upgrade pip
-              python -m pip install --no-cache-dir -e -r dev-requirements.txt
-              python -m pip install --no-cache-dir -r requirements.txt
-            displayName: Install dbt-spark-cccs
+              python -m pip install --no-cache-dir -e .
+              python -m pip install --no-cache-dir -r dev-requirements.txt -r requirements.txt
+            displayName: Install dbt-spark-hogwarts
             workingDirectory: $(Pipeline.Workspace)/s
           - script: |
               . ./venv/bin/activate
