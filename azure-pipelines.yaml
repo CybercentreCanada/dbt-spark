@@ -37,8 +37,8 @@ stages:
               python -m venv venv
               . ./venv/bin/activate
               python -m pip install --upgrade pip
-              python -m pip install --no-cache-dir -e .
-              python -m pip install --no-cache-dir -r test/requirements.txt
+              python -m pip install --no-cache-dir -e -r dev-requirements.txt
+              python -m pip install --no-cache-dir -r requirements.txt
             displayName: Install dbt-spark-cccs
             workingDirectory: $(Pipeline.Workspace)/s
           - script: |
