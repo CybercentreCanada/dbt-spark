@@ -1,0 +1,96 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - cccs-main
+      - cccs/*
+
+pr:
+  branches:
+    include:
+      - cccs-main
+
+parameters:
+  - name: forceBuildPython
+    displayName: Force build Python artifact & push to feed
+    type: boolean
+    default: false
+
+variables:
+  tag: "$(Build.BuildId)"
+  pythonArtifactName: "dbt-spark-cccs"
+  pythonVersion: "3.10"
+  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+
+pool: "stratus-build-pool.u"
+
+stages:
+  - stage: Test
+    jobs:
+      - job: UnitTests
+        steps:
+          - task: UsePythonVersion@0
+            displayName: Set python version
+            inputs:
+              versionSpec: "3.10"
+          - script: |
+              python -m venv venv
+              . ./venv/bin/activate
+              python -m pip install --upgrade pip
+              python -m pip install --no-cache-dir -e .
+              python -m pip install --no-cache-dir -r test/requirements.txt
+            displayName: Install dbt-spark-cccs
+            workingDirectory: $(Pipeline.Workspace)/s
+          - script: |
+              . ./venv/bin/activate
+              pytest -rsx -vv tests
+            workingDirectory: $(Pipeline.Workspace)/s
+            displayName: Test
+  - stage: Build_and_push
+    jobs:
+      - job: Build
+        workspace:
+          clean: all
+        steps:
+          - script: |
+              virtualenv -p python$(pythonVersion) env
+              source env/bin/activate
+              pip install wheel
+              pip install -r requirements.txt
+              cat version.txt
+              python setup.py sdist bdist_wheel
+            displayName: "Install and Build."
+          - task: CopyFiles@2
+            inputs:
+              targetFolder: $(Build.ArtifactStagingDirectory)
+            displayName: "Stage build artifact to publish"
+          - task: PublishBuildArtifacts@1
+            displayName: Publish build artifacts
+            inputs:
+              pathtoPublish: "$(Build.ArtifactStagingDirectory)/python/dist"
+              artifactName: "python_dist"
+              publishLocation: "Container"
+      - job: PublishArtifactToFeed
+        dependsOn: BuildPythonArtifact
+        condition: or(eq(variables.isMaster, true), eq('${{ parameters.forceBuildPython }}', true))
+        workspace:
+          clean: all
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: "current"
+              downloadType: "specific"
+              downloadPath: "$(Pipeline.Workspace)"
+            displayName: "Download build artifact."
+          - script: |
+              virtualenv -p python$(pythonVersion) env
+              source env/bin/activate
+              pip install twine
+              python -m twine upload -r pypi-cccs --config-file /home/stratus/stratus-build-agent/pypirc/.pypirc $(Pipeline.Workspace)/python_dist/*
+            displayName: "Publish artifact to nexus-u feed."
+          - script: |
+              virtualenv -p python$(pythonVersion) env
+              source env/bin/activate
+              pip install twine
+              python -m twine upload -r pypi-ap --config-file /home/stratus/stratus-build-agent/pypirc/.pypirc $(Pipeline.Workspace)/python_dist/*
+            displayName: 'Publish artifact to BagOfHolding feed.'
