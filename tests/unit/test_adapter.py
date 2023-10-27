@@ -5,11 +5,11 @@ import dbt.flags as flags
 from dbt.exceptions import DbtRuntimeError
 from agate import Row
 from pyhive import hive
-from dbt.adapters.sparkhogwarts import SparkAdapter, SparkRelation
+from dbt.adapters.sparkhogwarts import SparkHogwartsAdapter, SparkRelation
 from .utils import config_from_parts_or_dicts
 
 
-class TestSparkAdapter(unittest.TestCase):
+class TestSparkHogwartsAdapter(unittest.TestCase):
     def setUp(self):
         flags.STRICT_MODE = False
 
@@ -145,7 +145,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_http_connection(self):
         config = self._get_target_http(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
 
         def hive_http_connect(thrift_transport):
             self.assertEqual(thrift_transport.scheme, "https")
@@ -169,7 +169,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_thrift_connection(self):
         config = self._get_target_thrift(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
 
         def hive_thrift_connect(host, port, username, auth, kerberos_service_name, password):
             self.assertEqual(host, "myorg.sparkhost.com")
@@ -190,7 +190,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_thrift_ssl_connection(self):
         config = self._get_target_use_ssl_thrift(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
 
         def hive_thrift_connect(thrift_transport):
             self.assertIsNotNone(thrift_transport)
@@ -209,7 +209,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_thrift_connection_kerberos(self):
         config = self._get_target_thrift_kerberos(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
 
         def hive_thrift_connect(host, port, username, auth, kerberos_service_name, password):
             self.assertEqual(host, "myorg.sparkhost.com")
@@ -230,7 +230,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_odbc_cluster_connection(self):
         config = self._get_target_odbc_cluster(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
 
         def pyodbc_connect(connection_str, autocommit):
             self.assertTrue(autocommit)
@@ -257,7 +257,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_odbc_endpoint_connection(self):
         config = self._get_target_odbc_sql_endpoint(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
 
         def pyodbc_connect(connection_str, autocommit):
             self.assertTrue(autocommit)
@@ -320,7 +320,7 @@ class TestSparkAdapter(unittest.TestCase):
         input_cols = [Row(keys=["col_name", "data_type"], values=r) for r in plain_rows]
 
         config = self._get_target_http(self.project_cfg)
-        rows = SparkAdapter(config).parse_describe_extended(relation, input_cols)
+        rows = SparkHogwartsAdapter(config).parse_describe_extended(relation, input_cols)
         self.assertEqual(len(rows), 4)
         self.assertEqual(
             rows[0].to_column_dict(omit_none=False),
@@ -409,7 +409,7 @@ class TestSparkAdapter(unittest.TestCase):
         input_cols = [Row(keys=["col_name", "data_type"], values=r) for r in plain_rows]
 
         config = self._get_target_http(self.project_cfg)
-        rows = SparkAdapter(config).parse_describe_extended(relation, input_cols)
+        rows = SparkHogwartsAdapter(config).parse_describe_extended(relation, input_cols)
 
         self.assertEqual(rows[0].to_column_dict().get("table_owner"), "1234")
 
@@ -445,7 +445,7 @@ class TestSparkAdapter(unittest.TestCase):
         input_cols = [Row(keys=["col_name", "data_type"], values=r) for r in plain_rows]
 
         config = self._get_target_http(self.project_cfg)
-        rows = SparkAdapter(config).parse_describe_extended(relation, input_cols)
+        rows = SparkHogwartsAdapter(config).parse_describe_extended(relation, input_cols)
         self.assertEqual(len(rows), 1)
         self.assertEqual(
             rows[0].to_column_dict(omit_none=False),
@@ -474,7 +474,7 @@ class TestSparkAdapter(unittest.TestCase):
 
     def test_relation_with_database(self):
         config = self._get_target_http(self.project_cfg)
-        adapter = SparkAdapter(config)
+        adapter = SparkHogwartsAdapter(config)
         # fine
         adapter.Relation.create(schema="different", identifier="table")
         with self.assertRaises(DbtRuntimeError):
@@ -555,7 +555,7 @@ class TestSparkAdapter(unittest.TestCase):
         )
 
         config = self._get_target_http(self.project_cfg)
-        columns = SparkAdapter(config).parse_columns_from_information(relation)
+        columns = SparkHogwartsAdapter(config).parse_columns_from_information(relation)
         self.assertEqual(len(columns), 4)
         self.assertEqual(
             columns[0].to_column_dict(omit_none=False),
@@ -640,7 +640,7 @@ class TestSparkAdapter(unittest.TestCase):
         )
 
         config = self._get_target_http(self.project_cfg)
-        columns = SparkAdapter(config).parse_columns_from_information(relation)
+        columns = SparkHogwartsAdapter(config).parse_columns_from_information(relation)
         self.assertEqual(len(columns), 4)
         self.assertEqual(
             columns[1].to_column_dict(omit_none=False),
@@ -706,7 +706,7 @@ class TestSparkAdapter(unittest.TestCase):
         )
 
         config = self._get_target_http(self.project_cfg)
-        columns = SparkAdapter(config).parse_columns_from_information(relation)
+        columns = SparkHogwartsAdapter(config).parse_columns_from_information(relation)
         self.assertEqual(len(columns), 4)
         self.assertEqual(
             columns[2].to_column_dict(omit_none=False),
