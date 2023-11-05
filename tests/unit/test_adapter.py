@@ -32,7 +32,7 @@ class TestSparkAdapter(unittest.TestCase):
             {
                 "outputs": {
                     "test": {
-                        "type": "spark",
+                        "type": "sparkhogwarts",
                         "method": "http",
                         "schema": "analytics",
                         "host": "myorg.sparkhost.com",
@@ -52,7 +52,7 @@ class TestSparkAdapter(unittest.TestCase):
             {
                 "outputs": {
                     "test": {
-                        "type": "spark",
+                        "type": "sparkhogwarts",
                         "method": "thrift",
                         "schema": "analytics",
                         "host": "myorg.sparkhost.com",
@@ -70,7 +70,7 @@ class TestSparkAdapter(unittest.TestCase):
             {
                 "outputs": {
                     "test": {
-                        "type": "spark",
+                        "type": "sparkhogwarts",
                         "method": "thrift",
                         "schema": "analytics",
                         "host": "myorg.sparkhost.com",
@@ -90,7 +90,7 @@ class TestSparkAdapter(unittest.TestCase):
             {
                 "outputs": {
                     "test": {
-                        "type": "spark",
+                        "type": "sparkhogwarts",
                         "method": "thrift",
                         "use_ssl": True,
                         "schema": "analytics",
@@ -109,7 +109,7 @@ class TestSparkAdapter(unittest.TestCase):
             {
                 "outputs": {
                     "test": {
-                        "type": "spark",
+                        "type": "sparkhogwarts",
                         "method": "odbc",
                         "schema": "analytics",
                         "host": "myorg.sparkhost.com",
@@ -130,7 +130,7 @@ class TestSparkAdapter(unittest.TestCase):
             {
                 "outputs": {
                     "test": {
-                        "type": "spark",
+                        "type": "sparkhogwarts",
                         "method": "odbc",
                         "schema": "analytics",
                         "host": "myorg.sparkhost.com",
@@ -157,7 +157,7 @@ class TestSparkAdapter(unittest.TestCase):
             )
 
         # with mock.patch.object(hive, 'connect', new=hive_http_connect):
-        with mock.patch("dbt.adapters.spark.connections.hive.connect", new=hive_http_connect):
+        with mock.patch("dbt.adapters.sparkhogwarts.connections.hive.connect", new=hive_http_connect):
             connection = adapter.acquire_connection("dummy")
             connection.handle  # trigger lazy-load
 
@@ -244,7 +244,7 @@ class TestSparkAdapter(unittest.TestCase):
             )  # noqa
 
         with mock.patch(
-            "dbt.adapters.spark.connections.pyodbc.connect", new=pyodbc_connect
+            "dbt.adapters.sparkhogwarts.connections.pyodbc.connect", new=pyodbc_connect
         ):  # noqa
             connection = adapter.acquire_connection("dummy")
             connection.handle  # trigger lazy-load
@@ -270,7 +270,7 @@ class TestSparkAdapter(unittest.TestCase):
             )  # noqa
 
         with mock.patch(
-            "dbt.adapters.spark.connections.pyodbc.connect", new=pyodbc_connect
+            "dbt.adapters.sparkhogwarts.connections.pyodbc.connect", new=pyodbc_connect
         ):  # noqa
             connection = adapter.acquire_connection("dummy")
             connection.handle  # trigger lazy-load
@@ -488,7 +488,7 @@ class TestSparkAdapter(unittest.TestCase):
         profile = {
             "outputs": {
                 "test": {
-                    "type": "spark",
+                    "type": "sparkhogwarts",
                     "method": "http",
                     # not allowed
                     "database": "analytics2",
@@ -509,7 +509,7 @@ class TestSparkAdapter(unittest.TestCase):
         profile = {
             "outputs": {
                 "test": {
-                    "type": "spark",
+                    "type": "sparkhogwarts",
                     "method": "odbc",
                     "schema": "analytics",
                     "host": "myorg.sparkhost.com",
