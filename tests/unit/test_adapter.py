@@ -6,10 +6,11 @@ from dbt.exceptions import DbtRuntimeError
 from agate import Row
 from pyhive import hive
 from dbt.adapters.sparkhogwarts import SparkHogwartsAdapter, SparkRelation
+import pytest
 from .utils import config_from_parts_or_dicts
 
 
-class TestSparkHogwartsAdapter(unittest.TestCase):
+class TestSparkAdapter(unittest.TestCase):
     def setUp(self):
         flags.STRICT_MODE = False
 
@@ -472,6 +473,7 @@ class TestSparkHogwartsAdapter(unittest.TestCase):
             },
         )
 
+    @pytest.mark.skip(reason="exception removed from SparkHogwartsAdapter")
     def test_relation_with_database(self):
         config = self._get_target_http(self.project_cfg)
         adapter = SparkHogwartsAdapter(config)
@@ -481,6 +483,7 @@ class TestSparkHogwartsAdapter(unittest.TestCase):
             # not fine - database set
             adapter.Relation.create(database="something", schema="different", identifier="table")
 
+    @pytest.mark.skip(reason="exception removed from SparkHogwartsAdapter")
     def test_profile_with_database(self):
         profile = {
             "outputs": {

@@ -18,7 +18,7 @@ parameters:
 
 variables:
   tag: "$(Build.BuildId)"
-  pythonArtifactName: "dbt-spark-hogwarts"
+  pythonArtifactName: "dbt-spark-cccs"
   pythonVersion: "3.10"
   isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/cccs-main')]
 
@@ -43,7 +43,7 @@ stages:
             workingDirectory: $(Pipeline.Workspace)/s
           - script: |
               . ./venv/bin/activate
-              pytest -rsx -vv tests
+              python -m tox -e unit
             workingDirectory: $(Pipeline.Workspace)/s
             displayName: Test
   - stage: Build_and_push

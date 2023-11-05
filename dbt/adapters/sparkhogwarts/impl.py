@@ -263,7 +263,7 @@ class SparkHogwartsAdapter(SQLAdapter):
                         row_list=show_table_rows,
                         relation_info_func=self._get_relation_information_using_describe,
                     )
-                except dbt.exceptions.DbtRuntimeError as e:
+                except dbt.exceptions.DbtRuntimeError:
                     logger.debug(f"Error while retrieving information about [{schema_relation}] error: {errmsg}")
                     return []
             else:
