@@ -39,7 +39,7 @@ stages:
               python -m pip install --upgrade pip
               python -m pip install --no-cache-dir -e .
               python -m pip install --no-cache-dir -r dev-requirements.txt -r requirements.txt
-              python -m pip install --no-cache-dir dbt-spark[ODBC]
+              python -m pip install --no-cache-dir dbt-spark[ODBC]==1.6.0
             displayName: Install dbt-spark-hogwarts
             workingDirectory: $(Pipeline.Workspace)/s
           - script: |
