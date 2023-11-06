@@ -68,7 +68,7 @@ stages:
           - task: PublishBuildArtifacts@1
             displayName: Publish build artifacts
             inputs:
-              pathtoPublish: "$(Build.ArtifactStagingDirectory)/python/dist"
+              pathtoPublish: "$(Build.ArtifactStagingDirectory)/dist"
               artifactName: "python_dist"
               publishLocation: "Container"
       - job: Publish
