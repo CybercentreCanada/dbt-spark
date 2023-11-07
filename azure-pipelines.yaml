@@ -18,7 +18,7 @@ parameters:
 
 variables:
   tag: "$(Build.BuildId)"
-  pythonArtifactName: "dbt-spark-cccs"
+  pythonArtifactName: "dbt-spark-hogwarts"
   pythonVersion: "3.10"
   isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/cccs-main')]
 
