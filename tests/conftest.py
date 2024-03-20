@@ -37,7 +37,7 @@ def dbt_profile_target(request):
 
 def apache_spark_target():
     return {
-        "type": "spark",
+        "type": "sparkhogwarts",
         "host": "localhost",
         "user": "dbt",
         "method": "thrift",
@@ -50,7 +50,7 @@ def apache_spark_target():
 
 def databricks_cluster_target():
     return {
-        "type": "spark",
+        "type": "sparkhogwarts",
         "method": "odbc",
         "host": os.getenv("DBT_DATABRICKS_HOST_NAME"),
         "cluster": os.getenv("DBT_DATABRICKS_CLUSTER_NAME"),
@@ -66,7 +66,7 @@ def databricks_cluster_target():
 
 def databricks_sql_endpoint_target():
     return {
-        "type": "spark",
+        "type": "sparkhogwarts",
         "method": "odbc",
         "host": os.getenv("DBT_DATABRICKS_HOST_NAME"),
         "endpoint": os.getenv("DBT_DATABRICKS_ENDPOINT"),
@@ -81,7 +81,7 @@ def databricks_sql_endpoint_target():
 
 def databricks_http_cluster_target():
     return {
-        "type": "spark",
+        "type": "sparkhogwarts",
         "host": os.getenv("DBT_DATABRICKS_HOST_NAME"),
         "cluster": os.getenv("DBT_DATABRICKS_CLUSTER_NAME"),
         "token": os.getenv("DBT_DATABRICKS_TOKEN"),
@@ -98,7 +98,7 @@ def databricks_http_cluster_target():
 
 def spark_session_target():
     return {
-        "type": "spark",
+        "type": "sparkhogwarts",
         "host": "localhost",
         "method": "session",
     }
