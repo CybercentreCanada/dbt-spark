@@ -279,7 +279,7 @@ class AllPurposeClusterPythonJobHelper(BaseDatabricksHelper):
     def submit(self, compiled_code: str) -> None:
         try:
             spark = SparkSession.builder.getOrCreate() # Local passed to compiled_code call
-            exec(compiled_code.replace('format("delta")', 'format("iceberg")'), locals())
+            exec(compiled_code, locals())
         except Exception as e:
             print(f"There's an issue with the Python model. See trace: {traceback.format_exc()}")
             raise dbt.exceptions.RuntimeException(f"The Python model failed with traceback: {e}")
