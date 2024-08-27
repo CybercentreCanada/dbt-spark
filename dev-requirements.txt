@@ -24,3 +24,7 @@ tox>=3.2.0
 # Test requirements
 sasl>=0.2.1
 thrift_sasl==0.4.3
+
+
+# Fix setuptools bug
+setuptools==70.1.0
