@@ -4,7 +4,7 @@ git+https://github.com/dbt-labs/dbt-core.git@v1.3.0#egg=dbt-core&subdirectory=co
 git+https://github.com/dbt-labs/dbt-core.git@v1.3.0#egg=dbt-tests-adapter&subdirectory=tests/adapter
 
 
-black==22.8.0
+black==24.3.0
 bumpversion
 click~=8.1.3
 flake8
